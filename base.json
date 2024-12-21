@@ -1,0 +1,32 @@
+{
+    "proyectos": [
+        {
+            "id": 1,
+            "nombre":"Proyecto clínica Odontológica",
+            "descripcion": "Definir las tablas, campos y relaciones para almacenar",
+            "tareas":[
+                {
+                    "id": 1,
+                    "nombre": "Diseñar la base de datos",
+                    "descripcion": "Definir las tablas, campos y relaciones para almacenar",
+                    "estado_completado": true,
+                    "fecha_limite": "2024-12-01"
+                },
+                {
+                    "id": 2,
+                    "nombre": "Implementar Backend",
+                    "descripcion": "Crear las apis necesarias para realizar las operaciones",
+                    "estado_completado": false,
+                    "fecha_limite": "2024-12-15"
+                },
+                {
+                    "id": 3,
+                    "nombre": "Diseño de UI/UX",
+                    "descripcion": "Desarrollar una interfaz amigable para la gestión...",
+                    "estado_completado": true,
+                    "fecha_limite": "2024-11-20"
+                }
+            ]
+        }
+    ]
+}

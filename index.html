@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualización de Proyectos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .project {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .project h2 {
+            margin-top: 0;
+        }
+        .task {
+            margin-left: 20px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .completed {
+            background-color: #d4edda;
+        }
+        .not-completed {
+            background-color: #f8d7da;
+        }
+        .button {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px 0;
+            font-size: 14px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .button-delete {
+            background-color: #dc3545;
+        }
+        .button-delete:hover {
+            background-color: #a71d2a;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group button {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proyectos</h1>
+    <div id="projects-container"></div>
+
+    <script>
+        fetch('base.json')
+            .then(response => response.json())
+            .then(data => {
+                const projectsContainer = document.getElementById('projects-container');
+
+                data.proyectos.forEach((project) => {
+                    const projectDiv = document.createElement('div');
+                    projectDiv.classList.add('project');
+
+                    const projectTitle = document.createElement('h2');
+                    projectTitle.textContent = project.nombre;
+                    projectDiv.appendChild(projectTitle);
+
+                    const projectDescription = document.createElement('p');
+                    projectDescription.textContent = project.descripcion;
+                    projectDiv.appendChild(projectDescription);
+
+                    const tasksTitle = document.createElement('h3');
+                    tasksTitle.textContent = 'Tareas:';
+                    projectDiv.appendChild(tasksTitle);
+
+                    const tasksContainer = document.createElement('div');
+                    tasksContainer.classList.add('tasks-container');
+                    projectDiv.appendChild(tasksContainer);
+
+                    project.tareas.forEach((task) => {
+                        const taskDiv = createTaskElement(task, tasksContainer);
+                        tasksContainer.appendChild(taskDiv);
+                    });
+
+                    // Formulario para agregar nuevas tareas
+                    const taskForm = document.createElement('div');
+                    taskForm.classList.add('input-group');
+
+                    const nameInput = createInputField('Nombre de la nueva tarea:', 'text');
+                    const descriptionInput = createInputField('Descripción de la nueva tarea:', 'text');
+                    const dateInput = createInputField('Fecha límite:', 'date');
+                    const statusCheckbox = createInputField('¿Está completada esta tarea?', 'checkbox');
+
+                    const addTaskButton = document.createElement('button');
+                    addTaskButton.textContent = 'Agregar Tarea';
+                    addTaskButton.classList.add('button');
+                    addTaskButton.addEventListener('click', () => {
+                        const newTask = {
+                            nombre: nameInput.querySelector('input').value,
+                            descripcion: descriptionInput.querySelector('input').value,
+                            fecha_limite: dateInput.querySelector('input').value,
+                            estado_completado: statusCheckbox.querySelector('input').checked
+                        };
+
+                        if (newTask.nombre && newTask.descripcion && newTask.fecha_limite) {
+                            const newTaskDiv = createTaskElement(newTask, tasksContainer);
+                            tasksContainer.appendChild(newTaskDiv);
+
+                            // Limpiar campos del formulario
+                            nameInput.querySelector('input').value = '';
+                            descriptionInput.querySelector('input').value = '';
+                            dateInput.querySelector('input').value = '';
+                            statusCheckbox.querySelector('input').checked = false;
+                        } else {
+                            alert('Por favor, completa todos los campos.');
+                        }
+                    });
+
+                    taskForm.appendChild(nameInput);
+                    taskForm.appendChild(descriptionInput);
+                    taskForm.appendChild(dateInput);
+                    taskForm.appendChild(statusCheckbox);
+                    taskForm.appendChild(addTaskButton);
+                    projectDiv.appendChild(taskForm);
+
+                    projectsContainer.appendChild(projectDiv);
+                });
+            })
+            .catch(error => console.error('Error al cargar el JSON:', error));
+
+        function createTaskElement(task, parentContainer) {
+            const taskDiv = document.createElement('div');
+            taskDiv.classList.add('task');
+            taskDiv.classList.add(task.estado_completado ? 'completed' : 'not-completed');
+
+            const taskTitle = document.createElement('h4');
+            taskTitle.textContent = task.nombre;
+            taskDiv.appendChild(taskTitle);
+
+            const taskDescription = document.createElement('p');
+            taskDescription.textContent = task.descripcion;
+            taskDiv.appendChild(taskDescription);
+
+            const taskDeadline = document.createElement('p');
+            taskDeadline.textContent = `Fecha límite: ${task.fecha_limite}`;
+            taskDiv.appendChild(taskDeadline);
+
+            const taskStatus = document.createElement('p');
+            taskStatus.textContent = `Estado: ${task.estado_completado ? 'Completado' : 'No completado'}`;
+            taskDiv.appendChild(taskStatus);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Eliminar Tarea';
+            deleteButton.classList.add('button', 'button-delete');
+            deleteButton.addEventListener('click', () => {
+                parentContainer.removeChild(taskDiv);
+            });
+            taskDiv.appendChild(deleteButton);
+
+            return taskDiv;
+        }
+
+        function createInputField(labelText, type) {
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
+
+            const label = document.createElement('label');
+            label.textContent = labelText;
+            inputGroup.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = type;
+            inputGroup.appendChild(input);
+
+            return inputGroup;
+        }
+    </script>
+</body>
+</html>
+
+
